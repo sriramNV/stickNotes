@@ -1,3 +1,5 @@
+import React from "react";
+
 const Trash = ({size = "24"}) => {
     return (
         <svg
@@ -18,3 +20,5 @@ const Trash = ({size = "24"}) => {
         </svg>
     );
 }
+
+export default Trash;
