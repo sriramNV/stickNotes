@@ -16,3 +16,5 @@ const DeleteButton = ({ noteID}) => {
     //     <div onClick={handleDelete}><Trash /></div>
     // );
 }
+
+export default DeleteButton;
