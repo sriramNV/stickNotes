@@ -1,6 +1,6 @@
 import React from "react";
 
-const Trash = ({size = "24"}) => {
+const Trash = ({ size = "24" }) => {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -16,9 +16,8 @@ const Trash = ({size = "24"}) => {
                 strokeLinecap="round"
                 d="m10.151 12.5.245 3.492M13.849 12.5l-.245 3.492M4 8s4.851 1 8 1 8-1 8-1M8 5l.447-.894A2 2 0 0 1 10.237 3h3.527a2 2 0 0 1 1.789 1.106L16 5"
             ></path>
-
         </svg>
     );
-}
+};
 
 export default Trash;
