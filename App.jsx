@@ -1,7 +1,7 @@
 import NotesPage from './pages/NotesPage';
 
 function App() {
-  return (<div>
+  return (<div id='app'>
     <NotesPage />
   </div>)
 
