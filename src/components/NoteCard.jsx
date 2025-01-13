@@ -10,6 +10,7 @@ import { NotesContext } from "../context/NotesContext";
 const NoteCard = ({ note }) => {
     let mouseStartPos = { x: 0, y: 0 };
     const cardRef = useRef(null);
+    let initialScrollX = null;
 
     const { setSelectedNote } = useContext(NotesContext);
 
@@ -44,6 +45,7 @@ const NoteCard = ({ note }) => {
     
 
     const mouseDown = (e) => {
+        initialScrollX = window.scrollX;
         console.log("Mouse Down event:", e.type);
         if (e.target.className === "card-header") {
             // mouseStartPos.x = e.clientX;
@@ -74,41 +76,51 @@ const NoteCard = ({ note }) => {
 
     const mouseMove = (e) => {
         console.log("Mouse Move event:", e.type);
-        const mouseMoveDir = {
-            x: mouseStartPos.x - e.clientX,
-            y: mouseStartPos.y - e.clientY,
-        };
+        // const mouseMoveDir = {
+        //     x: mouseStartPos.x - e.clientX,
+        //     y: mouseStartPos.y - e.clientY,
+        // };
 
-        // mouseStartPos.x = e.clientX;
-        // mouseStartPos.y = e.clientY;
+        // // mouseStartPos.x = e.clientX;
+        // // mouseStartPos.y = e.clientY;
 
-        if (e.type.startsWith('touch')) {
-            e.preventDefault();
-            const touch = e.touches[0]; // Get the first touch point
-            mouseStartPos.x = touch.clientX;
-            mouseStartPos.y = touch.clientY;
-        } else {
-            // For mouse events, use the original logic
-            mouseStartPos.x = e.clientX;
-            mouseStartPos.y = e.clientY;
-        }
+        // if (e.type.startsWith('touch')) {
+        //     e.preventDefault();
+        //     const touch = e.touches[0]; // Get the first touch point
+        //     mouseStartPos.x = touch.clientX;
+        //     mouseStartPos.y = touch.clientY;
+        // } else {
+        //     // For mouse events, use the original logic
+        //     mouseStartPos.x = e.clientX;
+        //     mouseStartPos.y = e.clientY;
+        // }
 
-        // const newPosition = setNewOffset(cardRef.current, mouseMoveDir);
-        // setPosition(newPosition);
-        if (e.type.startsWith('touch')) {
-            e.preventDefault();
-            const touch = e.touches[0]; 
-            setPosition({
-              x: touch.clientX, 
-              y: touch.clientY
-            });
-          } else {
-            setPosition({
-              x: e.clientX,
-              y: e.clientY
-            });
-          }
+        // // const newPosition = setNewOffset(cardRef.current, mouseMoveDir);
+        // // setPosition(newPosition);
+
+
         
+    if (e.type.startsWith('touch')) {
+        e.preventDefault(); 
+        const touch = e.touches[0]; 
+        setPosition({
+          x: touch.clientX, 
+          y: touch.clientY 
+        });
+
+        window.scrollTo(initialScrollX, window.scrollY); 
+      } else {
+        e.preventDefault(); 
+  
+        setPosition({
+          x: e.clientX,
+          y: e.clientY
+        });
+      }
+  
+      // Add this line to prevent overscroll 
+      
+
     };
 
     const mouseUp = async () => {
@@ -127,7 +139,7 @@ const NoteCard = ({ note }) => {
             n.$id === note.$id ? { ...n, position: JSON.stringify(newPosition) } : n
           );
           setNotes(updatedNotes);
-
+          initialScrollX = null;
     };
 
     const saveData = async (key, value) => {
