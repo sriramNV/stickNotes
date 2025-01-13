@@ -14,6 +14,7 @@ const NoteCard = ({ note }) => {
     const { setSelectedNote } = useContext(NotesContext);
 
     const [saving, setSaving] = useState(false);
+    const { notes, setNotes } = useContext(NotesContext); 
     const keyUpTimer = useRef(null);
 
     const [position, setPosition] = useState(JSON.parse(note.position));
@@ -22,43 +23,111 @@ const NoteCard = ({ note }) => {
 
     const textAreaRef = useRef(null);
 
+    // useEffect(() => {
+    //     autoGrow(textAreaRef);
+    //     setZIndex(cardRef.current);
+    // }, []);
+
     useEffect(() => {
-        autoGrow(textAreaRef);
-        setZIndex(cardRef.current);
-    }, []);
+        const cardHeaderElement = cardRef.current.querySelector('.card-header'); 
+    
+        const options = { passive: true }; // Add this line 
+    
+        cardHeaderElement.addEventListener('mousedown', mouseDown);
+        cardHeaderElement.addEventListener('touchstart', mouseDown, options); 
+    
+        return () => {
+            cardHeaderElement.removeEventListener('mousedown', mouseDown);
+            cardHeaderElement.removeEventListener('touchstart', mouseDown, options);
+        };
+      }, []); 
+    
 
     const mouseDown = (e) => {
+        console.log("Mouse Down event:", e.type);
         if (e.target.className === "card-header") {
-            mouseStartPos.x = e.clientX;
-            mouseStartPos.y = e.clientY;
+            // mouseStartPos.x = e.clientX;
+            // mouseStartPos.y = e.clientY;
+            
+            if (e.type === 'mousedown') { // Mouse event
+                mouseStartPos.x = e.clientX;
+                mouseStartPos.y = e.clientY;
+            } else if (e.type === 'touchstart') { // Touch event
+                const touch = e.touches[0];
+                mouseStartPos.x = touch.clientX;
+                mouseStartPos.y = touch.clientY;
+            }
+
 
             setZIndex(cardRef.current);
 
+            // document.addEventListener("mousemove", mouseMove);
+            // document.addEventListener("mouseup", mouseUp);
+            // setSelectedNote(note);
             document.addEventListener("mousemove", mouseMove);
             document.addEventListener("mouseup", mouseUp);
+            document.addEventListener("touchmove", mouseMove);
+            document.addEventListener("touchend", mouseUp);
             setSelectedNote(note);
         }
     };
 
     const mouseMove = (e) => {
+        console.log("Mouse Move event:", e.type);
         const mouseMoveDir = {
             x: mouseStartPos.x - e.clientX,
             y: mouseStartPos.y - e.clientY,
         };
 
-        mouseStartPos.x = e.clientX;
-        mouseStartPos.y = e.clientY;
+        // mouseStartPos.x = e.clientX;
+        // mouseStartPos.y = e.clientY;
 
-        const newPosition = setNewOffset(cardRef.current, mouseMoveDir);
-        setPosition(newPosition);
+        if (e.type.startsWith('touch')) {
+            e.preventDefault();
+            const touch = e.touches[0]; // Get the first touch point
+            mouseStartPos.x = touch.clientX;
+            mouseStartPos.y = touch.clientY;
+        } else {
+            // For mouse events, use the original logic
+            mouseStartPos.x = e.clientX;
+            mouseStartPos.y = e.clientY;
+        }
+
+        // const newPosition = setNewOffset(cardRef.current, mouseMoveDir);
+        // setPosition(newPosition);
+        if (e.type.startsWith('touch')) {
+            e.preventDefault();
+            const touch = e.touches[0]; 
+            setPosition({
+              x: touch.clientX, 
+              y: touch.clientY
+            });
+          } else {
+            setPosition({
+              x: e.clientX,
+              y: e.clientY
+            });
+          }
+        
     };
 
     const mouseUp = async () => {
+        // document.removeEventListener("mousemove", mouseMove);
+        // document.removeEventListener("mouseup", mouseUp);
+
         document.removeEventListener("mousemove", mouseMove);
         document.removeEventListener("mouseup", mouseUp);
+        document.removeEventListener("touchmove", mouseMove);
+        document.removeEventListener("touchend", mouseUp);
 
         const newPosition = setNewOffset(cardRef.current);
         saveData("position", newPosition);
+
+        const updatedNotes = notes.map(n => 
+            n.$id === note.$id ? { ...n, position: JSON.stringify(newPosition) } : n
+          );
+          setNotes(updatedNotes);
+
     };
 
     const saveData = async (key, value) => {
